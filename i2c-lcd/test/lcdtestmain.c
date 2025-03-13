@@ -7,6 +7,31 @@ int i, j;
 int Space;
 int count = 0;
 
+void reset() {
+    count = 0;
+    Command(0x01);
+    Write(0x45);
+    Write(0x6E);
+    Write(0x74);
+    Write(0x65);
+    Write(0x72);
+    Write(0x20);
+    Write(0x6E);
+    Write(0x3A);
+    Command(0xC0);
+    Write(0x54);
+    Write(0x20);
+    Write(0x3D);
+    Command(0xC7);
+    Write(0xDF);
+    Write(0x4B);
+    Command(0xCC);
+    Write(0x2E);
+    Command(0xCE);
+    Write(0xDF);
+    Write(0x43);
+    Command(0xC4);
+}
 
 int main(void)
 {
@@ -47,5 +72,16 @@ int main(void)
     {
         P1OUT ^= BIT0;                      // Toggle P1.0 using exclusive-OR
         __delay_cycles(100000);             // Delay for 100000*(1/MCLK)=0.1s
+    }
+}
+
+#pragma vector = EUSCI_B0_VECTOR
+__interrupt void EUSCI_B0_I2C_ISR(void) {
+    UCB0IE &= ~UCRXIE0;
+    Data = UCB0RXBUF;
+
+    if (Data == 0x23){
+        reset();
+        delay(1000);
     }
 }
