@@ -1,3 +1,5 @@
+/* This file was made with the assistance of AI*/
+
 #include <msp430.h>
 
 int i;
@@ -42,9 +44,6 @@ int main(void)
     P2DIR |= BIT7;              // P2.7 as Enable Port
     P2OUT &= ~BIT7;
 
-    P2DIR |= BIT0;              //Green LED
-    P2OUT &= ~BIT0;
-
     PM5CTL0 &= ~LOCKLPM5;       // disable digital I/O low-power default
 
     init();                     // call init function
@@ -58,7 +57,6 @@ int main(void)
 
     while(1){
     }
-
     return 0;
 }
 
@@ -99,7 +97,6 @@ void Nybble(){
     P2OUT |= BIT7;
     Delay(1);
     P2OUT &= ~BIT7;
-
 }
 
 void init(){
@@ -129,12 +126,121 @@ int Delay(int CountLong) {
     return 0;
 }
 
-
 int InnerDelay() {
     int CountShort;
     for(CountShort = 0; CountShort < 102; CountShort++) {}
     return 0;
 }
+
+void PatternZero(){
+        Delay(20);             
+        Write('s');         
+        Space++;
+        Delay(20);
+        Write('t');           
+        Space++;
+        Delay(20);
+        Write('a');         
+        Space++;
+        Delay(20);
+        Write('t');            
+        Space++;
+        Delay(20);
+        Write('i');         
+        Space++;
+        Delay(20);
+        Write('c');            
+        Space++;
+}
+
+void PatternOne(){
+        Delay(20);             
+        Write('t');          
+        Space++;
+        Delay(20);
+        Write('o');           
+        Space++;
+        Delay(20);
+        Write('g');           
+        Space++;
+        Delay(20);
+        Write('g');       
+        Space++;
+        Delay(20);
+        Write('l');            
+        Space++;
+        Delay(20);
+        Write('e');           
+        Space++;
+}
+
+void PatternTwo(){
+        Delay(20);             
+        Write('u');           
+        Space++;
+        Delay(20);
+        Write('p');           
+        Space++;
+        Delay(20);
+        Write(' ');         
+        Space++;
+        Delay(20);
+        Write('c');          
+        Space++;
+        Delay(20);
+        Write('o');            
+        Space++;
+        Delay(20);
+        Write('u');          
+        Space++;
+        Delay(20);
+        Write('n');         
+        Space++;
+        Delay(20);
+        Write('t');         
+        Space++;
+        Delay(20);
+        Write('e');          
+        Space++;
+        Delay(20);
+        Write('r');           
+        Space++;
+}
+
+void PatternThree(){
+        Delay(20);             
+        Write('i');            
+        Space++;
+        Delay(20);
+        Write('n');          
+        Space++;
+        Delay(20);
+        Write(' ');           
+        Space++;
+        Delay(20);
+        Write('a');          
+        Space++;
+        Delay(20);
+        Write('n');         
+        Space++;
+        Delay(20);
+        Write('d');          
+        Space++;
+        Delay(20);
+        Write(' ');         
+        Space++;
+        Delay(20);
+        Write('o');        
+        Space++;
+        Delay(20);
+        Write('u');          
+        Space++;
+        Delay(20);
+        Write('t');        
+        Space++;
+}
+
+// I will write the rest of the patterns later
 
 #pragma vector = EUSCI_B0_VECTOR
 __interrupt void EUSCI_B0_I2C_ISR(void){
@@ -155,15 +261,42 @@ __interrupt void EUSCI_B0_I2C_ISR(void){
     }
     else if(Data==0x23){        // if # is pressed, clear display
         Command(0x01);          // clear LCD display
-        P2OUT &= ~BIT0;
         Delay(200);
         Space=1;                // set the cursor to position 32
         Write(Data);            // send Data to Write function
         Delay(200);
-
+    }
+    else if(Data==0xWW){        // if 0 is pressed
+        PatternZero();        
+    }
+    else if(Data==0xRR){        // if 1 is pressed
+        PatternOne();
+    }
+    else if(Data==0xSS){        // if 2 is pressed
+        PatternTwo();
+    }
+    else if(Data==0xTT){        // if 3 is pressed
+        PatternThree();
+    }
+    else if(Data==0xUU){        // if 0 is pressed
+        PatternFour();        
+    }
+    else if(Data==0xVV){        // if 1 is pressed
+        PatternFive();
+    }
+    else if(Data==0xWW){        // if 2 is pressed
+        PatternSix();
+    }
+    else if(Data==0xXX){        // if 3 is pressed
+        PatternSeven();
+    }
+    else if(Data==0xYY){        // if 8 is pressed
+        PatternEight();
+    }
+    else if(Data==0xZZ){        // if 9 is pressed
+        PatternNine();
     }
     else{
-        P2OUT |= BIT0;
         Delay(200);
         Write(Data);            // send Data to Write function
         Space++;
