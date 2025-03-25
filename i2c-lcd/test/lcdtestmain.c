@@ -7,7 +7,24 @@ int i, j;
 int Space;
 int count = 0;
 
-void reset() {
+void Command(unsigned char SendCom){
+    P1OUT &= 0x0F;      // Clear upper bits
+    Data_In = SendCom;
+    Data_In &= 0xF0;    // Clear lower bits
+    P1OUT = Data_In;    // Set P1 to newer data
+    P2OUT &= ~BIT6;
+    Nybble();
+
+    Data_In = SendCom;
+    Data_In = Data_In<<4;
+    Data_In &= 0xF0;
+    P1OUT &= 0xF0;
+    P1PUT |= Data_In;
+    Nybble();
+    Delay(50);
+}
+
+void reset(){
     count = 0;
     Command(0x01);
     Write(0x45);
