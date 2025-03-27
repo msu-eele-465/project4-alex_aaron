@@ -290,12 +290,6 @@ __interrupt void EUSCI_B0_I2C_ISR(void){
     else if(Data==0xXX){        // if 3 is pressed
         PatternSeven();
     }
-    else if(Data==0xYY){        // if 8 is pressed
-        PatternEight();
-    }
-    else if(Data==0xZZ){        // if 9 is pressed
-        PatternNine();
-    }
     else{
         Delay(200);
         Write(Data);            // send Data to Write function
