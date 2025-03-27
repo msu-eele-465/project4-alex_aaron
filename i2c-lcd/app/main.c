@@ -123,28 +123,28 @@ __interrupt void EUSCI_B0_I2C_ISR(void) {
             Space = 1;
             Write(Data);
             break;
-        case 0xQQ:              // Pattern 0
+        case 0x24:              // Pattern 0
             DisplayPattern("static");
             break;
-        case 0xRR:              // Pattern 1
+        case 0x25:              // Pattern 1
             DisplayPattern("toggle");
             break;
-        case 0xSS:              // Pattern 2
+        case 0x26:              // Pattern 2
             DisplayPattern("up counter");
             break;
-        case 0xTT:              // Pattern 3
+        case 0x27:              // Pattern 3
             DisplayPattern("in and out");
             break;
-        case 0xUU:              // Pattern 4
+        case 0x28:              // Pattern 4
             DisplayPattern("down counter");
             break;
-        case 0xVV:              // Pattern 5
+        case 0x29:              // Pattern 5
             DisplayPattern("rotate left");
             break;
-        case 0xWW:              // Pattern 6
+        case 0x2A:              // Pattern 6
             DisplayPattern("rotate right");
             break;
-        case 0xXX:              // Pattern 7
+        case 0x2B:              // Pattern 7
             DisplayPattern("fill left");
             break;          
         default:
