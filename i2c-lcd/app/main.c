@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 #include <msp430.h>
+=======
+#include <msp430fr2310.h>
+#include <stdbool.h>
+>>>>>>> main
 
 int i;
 unsigned char dataIn;
@@ -7,6 +12,7 @@ int Data;                       // Data is used to receive data from buffer
 
 int main(void)
 {
+<<<<<<< HEAD
     WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
 
     UCB0CTLW0 |= UCSWRST;       // put into software reset
@@ -54,6 +60,23 @@ void Command(unsigned char SendCom) {
         P1OUT |= (SendCom << shift) & 0xF0;
         P2OUT &= ~BIT6;         // Command mode
         Nybble();
+=======
+    // Stop watchdog timer
+    WDTCTL = WDTPW | WDTHOLD;
+
+    P1OUT &= ~BIT0;
+    P1DIR |= BIT0;
+
+    // Disable low-power mode / GPIO high-impedance
+    PM5CTL0 &= ~LOCKLPM5;
+
+    while (true)
+    {
+        P1OUT ^= BIT0;
+
+        // Delay for 100000*(1/MCLK)=0.1s
+        __delay_cycles(100000);
+>>>>>>> main
     }
 }
 

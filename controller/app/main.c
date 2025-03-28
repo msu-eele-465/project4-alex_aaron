@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 #include <msp430.h>
+=======
+#include <msp430fr2355.h>
+#include <stdbool.h>
+>>>>>>> main
 
 int DataOut = 0x24;
 
 int main(void)
 {
+<<<<<<< HEAD
     WDTCTL = WDTPW | WDTHOLD;               // Stop watchdog timer
 
     UCB1CTLW0 |= UCSWRST;                   // UCSWRST=1 for eUSCI_B1 in SW reset
@@ -35,6 +41,23 @@ int main(void)
     while(1){
         UCB1CTLW0 |= UCTXSTT;
         for(i=0; i<100; i++){}
+=======
+    // Stop watchdog timer
+    WDTCTL = WDTPW | WDTHOLD;
+
+    P1OUT &= ~BIT0;
+    P1DIR |= BIT0;
+
+    // Disable low-power mode / GPIO high-impedance
+    PM5CTL0 &= ~LOCKLPM5;
+
+    while (true)
+    {
+        P1OUT ^= BIT0;
+
+        // Delay for 100000*(1/MCLK)=0.1s
+        __delay_cycles(100000);
+>>>>>>> main
     }
 
     return 0;
