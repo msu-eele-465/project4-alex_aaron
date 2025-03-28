@@ -38,12 +38,12 @@ int main(void)
 
     __enable_interrupt();       // global enable
 
-    while (true)
-    {
-        P1OUT ^= BIT0;
+    while (1){}
+}
 
-        // Delay for 100000*(1/MCLK)=0.1s
-        __delay_cycles(100000);
+void delay(){
+    for(k=0; k<1000; k++){
+        for(i=0; i<102; i++){}
     }
 }
 
