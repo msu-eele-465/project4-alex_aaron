@@ -1,84 +1,158 @@
-/* --COPYRIGHT--,BSD_EX
- * Copyright (c) 2014, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *******************************************************************************
- *
- *                       MSP430 CODE EXAMPLE DISCLAIMER
- *
- * MSP430 code examples are self-contained low-level programs that typically
- * demonstrate a single peripheral function or device feature in a highly
- * concise manner. For this the code may rely on the device's power-on default
- * register values and settings such as the clock configuration and care must
- * be taken when combining code from several examples to avoid potential side
- * effects. Also see www.ti.com/grace for a GUI- and www.ti.com/msp430ware
- * for an API functional library-approach to peripheral configuration.
- *
- * --/COPYRIGHT--*/
-//******************************************************************************
-//  MSP430FR231x Demo - Toggle P1.0 using software
-//
-//  Description: Toggle P1.0 every 0.1s using software.
-//  By default, FR231x select XT1 as FLL reference.
-//  If XT1 is present, the PxSEL(XIN & XOUT) needs to configure.
-//  If XT1 is absent, switch to select REFO as FLL reference automatically.
-//  XT1 is considered to be absent in this example.
-//  ACLK = default REFO ~32768Hz, MCLK = SMCLK = default DCODIV ~1MHz.
-//
-//           MSP430FR231x
-//         ---------------
-//     /|\|               |
-//      | |               |
-//      --|RST            |
-//        |           P1.0|-->LED
-//
-//   Darren Lu
-//   Texas Instruments Inc.
-//   July 2015
-//   Built with IAR Embedded Workbench v6.30 & Code Composer Studio v6.1 
-//******************************************************************************
-#include <msp430.h>
+#include <msp430fr2310.h>
+#include <stdbool.h>
+
+int data;
 
 int main(void)
 {
-    WDTCTL = WDTPW | WDTHOLD;               // Stop watchdog timer
+    // Stop watchdog timer
+    WDTCTL = WDTPW | WDTHOLD;
 
-    P1OUT &= ~BIT0;                         // Clear P1.0 output latch for a defined power-on state
-    P1DIR |= BIT0;                          // Set P1.0 to output direction
+    UCB0CTLW0   |=  UCSWRST;    // put into reset
 
-    PM5CTL0 &= ~LOCKLPM5;                   // Disable the GPIO power-on default high-impedance mode
-                                            // to activate previously configured port settings
+    UCB0CTLW0   |= UCSSEL_3;    // setting up SMCLK
+    UCB0BRW = 10;               // dividing by 10
 
-    while(1)
-    {
-        P1OUT ^= BIT0;                      // Toggle P1.0 using exclusive-OR
-        __delay_cycles(100000);             // Delay for 100000*(1/MCLK)=0.1s
+    UCB0CTLW0   |=  UCMODE_3;   // put into I2C mode
+    UCB0CTLW0   |=  UCMST;      // put into master mode
+    UCB0CTLW0   |=  UCTR;       // put into send (TX) mode
+
+    UCB0CTLW1   |=  UCASTP_2;   // auto stop
+    UCB0TBCNT   =   0x01;       // send 1 byte of data
+
+    P1SEL1  &=  ~BIT3;          // P1.3 as SCL
+    P1SEL0  |=  BIT3;
+    P1SEL1  &=  ~BIT2;          // P1.2 as SDA
+    P1SEL0  |=  BIT2;
+
+    // Port 2 as an output
+    P3DIR = 0xFF;
+    P3OUT = 0x00;
+
+    // Disable low-power mode / GPIO high-impedance
+    PM5CTL0 &= ~LOCKLPM5;
+
+    UCB0CTLW0 &= ~UCSWRST;      // put out of reset
+
+    UCB0IE |= UCRXIE0;          // ENABLE I2C RX IRQ
+
+    __enable_interrupt();       // global enable
+
+    while (1){}
+}
+
+void delay(){
+    for(k=0; k<1000; k++){
+        for(i=0; i<102; i++){}
     }
+}
+
+void handleButtonPress(int button) {
+  int j;
+  switch (button) {
+    case 1: // if A is pressed
+        P3OUT = 0xAA;
+    break;
+    case 2: // if B is pressed
+        for (j = 0; j <= 255; j++) {
+            P3OUT = j;
+            delay();
+            delay();
+        }
+    break;
+    case 3: // if C is pressed
+        P3OUT = 0xFE;
+        for (j = 0; j < 8; j++) {
+            delay(); delay(); delay(); delay();
+            P3OUT = (P3OUT << 1) | 0x01;
+        }
+        P3OUT = 0xFE;
+    break;
+    case 4: // if D is pressed
+        P3OUT = 0x18;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay();
+        P3OUT = 0x24;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay();
+        P3OUT = 0x42;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay();
+        P3OUT = 0x81;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay();
+        P3OUT = 0x42;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay();
+        P3OUT = 0x24;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay();
+        P3OUT = 0x18;
+    break;
+    case 5: // if 3 is pressed
+        P3OUT = 0x03;
+    break;
+    case 6: // if 6 is pressed
+        P3OUT = 0x06;
+    break;
+    case 7: // if 9 is pressed
+        P3OUT = 0x09;
+    break;
+    case 8: // if # is pressed
+        P3OUT = 0x00;
+        delay(); delay();
+        P3OUT = 0x73;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay(); delay();
+        P3OUT = 0x6F;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay(); delay();
+        P3OUT = 0x6F;
+        delay(); delay();
+        P3OUT = 0x00;
+        delay(); delay();
+        P3OUT = 0x73;
+        delay(); delay();
+        P3OUT = 0x00;
+    break;
+    case 9: // if 2 is pressed
+        P3OUT = 0x02;
+    break;
+    case 10: // if 5 is pressed
+        P3OUT = 0x05;
+    break;
+    case 11: // if 8 is pressed
+        P3OUT = 0x08;
+    break;
+    case 12: // if 0 is pressed
+        P3OUT = 0x00;
+    break;
+    case 13: // if 1 is pressed
+        P3OUT = 0x01;
+    break;
+    case 14: // if 4 is pressed
+        P3OUT = 0x04;
+    break;
+    case 15: // if 7 is pressed
+        P3OUT = 0x07;
+    break;
+    case 16: // if * is pressed
+        P3OUT = 0xFF;
+    break;
+  }
+}
+
+#pragma vector = EUSCI_B0_VECTOR
+__interrupt void EUSCI_B0_I2C_ISR(void){
+    UCB0IE &= ~UCRXIE0;
+    Data = UCB0RXBUF;           // receive data from buffer
+    handleButtonPress(Data);
 }
